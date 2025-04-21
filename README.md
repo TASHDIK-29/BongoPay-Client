@@ -43,16 +43,12 @@ Before you begin, make sure you have the following installed:
    npm install @react-navigation/native-stack
    npm install @react-navigation/bottom-tabs
 
-5. **Folder Structure**
-   BongoPay/
-     ├── assets/
-     ├── node_modules/
-     ├── App.js
-     ├── package.json
-     ├── package-lock.json
-     └── README.md
+### Folder Structure
 
-6. **Running the App**
+After setting up the project, the folder structure will look something like this:
+BongoPay/ ├── assets/ ├── node_modules/ ├── App.js ├── package.json ├── package-lock.json └── README.md
+
+### Running the App
    ```bash
    npm start
 
