@@ -45,14 +45,7 @@ Before you begin, make sure you have the following installed:
 
 ### Folder Structure
 
-After setting up the project, the folder structure will look something like this:
-BongoPay/
-  ├── assets/
-  ├── node_modules/
-  ├── App.js
-  ├── package.json
-  ├── package-lock.json
-  └── README.md
+**copy my all the files and paste it inside BongoPay directory**
 
 ### Running the App
    ```bash
