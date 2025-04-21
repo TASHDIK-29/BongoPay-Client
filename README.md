@@ -25,11 +25,6 @@ Before you begin, make sure you have the following installed:
 
    ```bash
    npx create-expo-app@latest --template blank
-   cd BongoPay
-   npm install @react-navigation/native
-   npm install react-native-screens react-native-safe-area-context
-   npm install @react-navigation/native-stack
-   npm install @react-navigation/bottom-tabs
 
 3. **Navigate to the BongoPay directory:**
    ```bash
