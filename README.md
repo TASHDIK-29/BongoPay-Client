@@ -10,7 +10,7 @@ Follow the steps below to set up the project locally.
 
 Before you begin, make sure you have the following installed:
 
-- [Node.js](https://nodejs.org/) (LTS version recommended)
+- [Node.js](https://nodejs.org/) (Current version recommended)
 - [npm](https://www.npmjs.com/) (usually comes with Node.js)
 
 ### Setting Up the Project
