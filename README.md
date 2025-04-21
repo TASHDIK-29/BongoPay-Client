@@ -12,7 +12,6 @@ Before you begin, make sure you have the following installed:
 
 - [Node.js](https://nodejs.org/) (LTS version recommended)
 - [npm](https://www.npmjs.com/) (usually comes with Node.js)
-- [Expo CLI](https://docs.expo.dev/get-started/installation/) (if not already installed)
 
 ### Setting Up the Project
 
