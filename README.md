@@ -25,10 +25,14 @@ Before you begin, make sure you have the following installed:
 
    ```bash
    npx create-expo-app@latest --template blank
+   ```
+   Name The App (in this case i use **BongoPay**)
 
 3. **Navigate to the BongoPay directory:**
    ```bash
    cd BongoPay
+   ```
+   If you named it different then replace BongoPay with you name
 
 4. **Install Dependencies:**
    ```bash
