@@ -44,13 +44,13 @@ Before you begin, make sure you have the following installed:
    npm install @react-navigation/bottom-tabs
 
 5. **Folder Structure**
-BongoPay/
-  ├── assets/
-  ├── node_modules/
-  ├── App.js
-  ├── package.json
-  ├── package-lock.json
-  └── README.md
+   BongoPay/
+     ├── assets/
+     ├── node_modules/
+     ├── App.js
+     ├── package.json
+     ├── package-lock.json
+     └── README.md
 
 6. **Running the App**
    ```bash
