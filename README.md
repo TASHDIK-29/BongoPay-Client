@@ -45,7 +45,7 @@ Before you begin, make sure you have the following installed:
 
 ### Folder Structure
 
-**copy my all the files and paste it inside BongoPay directory**
+Copy my all the files and paste it inside BongoPay directory (App.js should be overwritten)
 
 ### Running the App
    ```bash
