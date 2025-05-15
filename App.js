@@ -15,6 +15,13 @@ import SendMoney from "./src/screens/SendMoney";
 import { IconLogo } from "./src/constants/IconLogo";
 import { Colors } from "./src/constants/Colors";
 
+import { AuthProvider } from "./provider/UserProvider";
+import CashOut from "./src/screens/CashOut";
+import RequestMoney from "./src/screens/RequestMoney";
+import MoneyMap from "./src/screens/MoneyMap";
+import MoneyMapping from "./src/screens/MoneyMapping";
+import SavingsScreen from "./src/screens/SavingsScreen";
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -88,30 +95,62 @@ function TabNavigator() {
 export default function App() {
     return (
         <NavigationContainer>
-            <Stack.Navigator initialRouteName="Login">
-                <Stack.Screen
-                    name="Login"
-                    component={LoginScreen}
-                    options={{ headerShown: false }}
-                />
+            <AuthProvider>
+                <Stack.Navigator initialRouteName="Login">
+                    <Stack.Screen
+                        name="Login"
+                        component={LoginScreen}
+                        options={{ headerShown: false }}
+                    />
 
-                <Stack.Screen
-                    name="Send"
-                    component={SendMoney}
-                    options={{ headerShown: false }}
-                />
+                    <Stack.Screen
+                        name="Send"
+                        component={SendMoney}
+                        options={{ headerShown: false }}
+                    />
 
-                <Stack.Screen
-                    name="SignUp"
-                    component={SignUpScreen}
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name="HomeTabs"
-                    component={TabNavigator}
-                    options={{ headerShown: false }}
-                />
-            </Stack.Navigator>
+                    <Stack.Screen
+                        name="CashOut"
+                        component={CashOut}
+                        options={{ headerShown: false }}
+                    />
+
+                    <Stack.Screen
+                        name="Request"
+                        component={RequestMoney}
+                        options={{ headerShown: false }}
+                    />
+
+                    <Stack.Screen
+                        name="Map"
+                        component={MoneyMap}
+                        options={{ headerShown: false }}
+                    />
+
+                    <Stack.Screen
+                        name="Save"
+                        component={SavingsScreen}
+                        options={{ headerShown: false }}
+                    />
+
+                    {/* <Stack.Screen
+                        name="Mapping"
+                        component={MoneyMapping}
+                        options={{ headerShown: false }}
+                    /> */}
+
+                    <Stack.Screen
+                        name="SignUp"
+                        component={SignUpScreen}
+                        options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                        name="HomeTabs"
+                        component={TabNavigator}
+                        options={{ headerShown: false }}
+                    />
+                </Stack.Navigator>
+            </AuthProvider>
         </NavigationContainer>
     );
 }

@@ -17,6 +17,7 @@ import {
 import { styles } from "../constants/Styles";
 import { IconLogo } from "../constants/IconLogo";
 import { Colors } from "../constants/Colors";
+import useAxiosPublic from "../hooks/useAxiosPublic";
 
 const SignUpScreen = ({ navigation }) => {
     const [eye, setEye] = useState(IconLogo.eye);
@@ -24,9 +25,35 @@ const SignUpScreen = ({ navigation }) => {
     const [cshow, csetShow] = useState(false);
     const [ceye, csetEye] = useState(IconLogo.eye);
     const [email, setEmail] = useState("");
+    const [number, setNumber] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [fullName, setFullName] = useState("");
+
+
+    const handleSignUp = async () => {
+        if (password != confirmPassword) {
+            return alert("Password does not match!!!!!");
+        }
+
+        const userInfo = {
+            email, fullName, number, password
+        }
+
+        console.log(userInfo);
+
+        try {
+            const axiosPublic = useAxiosPublic();
+            const res = await axiosPublic.post('/users', userInfo);
+            console.log("Response from server:", res.data);
+            navigation.navigate("Login");
+        } catch (error) {
+            console.log("Signup error:", error.message);
+            if (error.response) {
+                console.log("Server responded with:", error.response.data);
+            }
+        }
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -58,7 +85,7 @@ const SignUpScreen = ({ navigation }) => {
 
                             <View style={styles.submitformwithlabel}>
                                 <Text style={styles.inputlabel}>
-                                    Email Username
+                                    Email
                                 </Text>
                                 <View style={styles.submitforminput}>
                                     <Image
@@ -73,6 +100,27 @@ const SignUpScreen = ({ navigation }) => {
                                         style={styles.input}
                                         value={email}
                                         onChangeText={setEmail}
+                                    />
+                                </View>
+                            </View>
+
+                            <View style={styles.submitformwithlabel}>
+                                <Text style={styles.inputlabel}>
+                                    Number
+                                </Text>
+                                <View style={styles.submitforminput}>
+                                    <Image
+                                        style={styles.lefticon}
+                                        source={IconLogo.mail}
+                                    />
+                                    <TextInput
+                                        placeholder="enter your number"
+                                        placeholderTextColor={
+                                            Colors.inputplaceholder
+                                        }
+                                        style={styles.input}
+                                        value={number}
+                                        onChangeText={setNumber}
                                     />
                                 </View>
                             </View>
@@ -165,9 +213,10 @@ const SignUpScreen = ({ navigation }) => {
 
                             <TouchableOpacity
                                 style={styles.loginbtn}
-                                
+
                                 // handle this onPress using backend logic
-                                onPress={() => navigation.navigate("Login")}
+                                // onPress={() => navigation.navigate("Login")}
+                                onPress={() => handleSignUp()}
                             >
                                 <Text style={styles.btntxt}>Sign Up</Text>
                             </TouchableOpacity>

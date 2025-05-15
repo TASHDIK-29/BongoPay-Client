@@ -20,31 +20,33 @@ import { Colors } from "../constants/Colors";
 import useAxiosPublic from "../hooks/useAxiosPublic";
 import { AuthContext } from "../../provider/UserProvider";
 
-const SendMoney = ({navigation}) => {
-    const [receiverEmail, setEmail] = useState(""); // Receiver's email
+const CashOut = ({ navigation }) => {
+    const [agentEmail, setAgentEmail] = useState(""); // Agent's email
     const [amount, setAmount] = useState(""); // Amount to send
 
     const { user } = useContext(AuthContext);
     const userEmail = user.email;
-    console.log(userEmail);
+    // console.log(userEmail);
 
-    const handleSendMoney = async () => {
+    const handleCashOut = async () => {
 
-        if(userEmail == receiverEmail)
-        {
-            return alert("You can not send money to yourself.");
+        if (userEmail == agentEmail) {
+            return alert("Restricted Transition.");
         }
 
         const axiosPublic = useAxiosPublic();
-        const res = await axiosPublic.patch('/sendMoney', { userEmail, receiverEmail, amount });
+        const res = await axiosPublic.patch('/CashOut', { userEmail, agentEmail, amount });
         console.log(res.data);
 
-        if (res.data.receiver) {
-            alert("Send Money Successful.");
+        if (res.data.message) {
+            alert(res.data.message);
+        }
+        else if (res.data.agent) {
+            alert("Cash Out Successful.");
             navigation.navigate("HomeTabs");
         }
-        else if (res.data.message) {
-            alert(res.data.message);
+        else if (!res.data.agent) {
+            alert("Agent not found.");
         }
     }
 
@@ -55,11 +57,11 @@ const SendMoney = ({navigation}) => {
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <ScrollView contentContainerStyle={styles.scroll}>
                         <View style={styles.form}>
-                            <Text style={styles.title}>Send Money</Text>
+                            <Text style={styles.title}>Cash Out</Text>
 
                             <View style={styles.submitformwithlabel}>
                                 <Text style={styles.inputlabel}>
-                                    Receiver's Email
+                                    Agent's Email
                                 </Text>
                                 <View style={styles.submitforminput}>
                                     <Image
@@ -67,13 +69,13 @@ const SendMoney = ({navigation}) => {
                                         source={IconLogo.person}
                                     />
                                     <TextInput
-                                        placeholder="Enter receiver's email"
+                                        placeholder="Enter agent's email"
                                         placeholderTextColor={
                                             Colors.inputplaceholder
                                         }
                                         style={styles.input}
-                                        value={receiverEmail}
-                                        onChangeText={(text) => setEmail(text)}
+                                        value={agentEmail}
+                                        onChangeText={(text) => setAgentEmail(text)}
                                     />
                                 </View>
                             </View>
@@ -101,9 +103,9 @@ const SendMoney = ({navigation}) => {
                             <TouchableOpacity
                                 style={styles.loginbtn}
                                 // handle onPress with backend logic
-                                onPress={() => handleSendMoney()}
+                                onPress={() => handleCashOut()}
                             >
-                                <Text style={styles.btntxt}>Send</Text>
+                                <Text style={styles.btntxt}>Out</Text>
                             </TouchableOpacity>
                         </View>
                     </ScrollView>
@@ -113,4 +115,4 @@ const SendMoney = ({navigation}) => {
     );
 };
 
-export default SendMoney;
+export default CashOut;

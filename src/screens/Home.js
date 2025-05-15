@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
     SafeAreaView,
     StatusBar,
@@ -10,9 +10,31 @@ import {
 
 import { styles } from "../constants/Styles";
 import { IconLogo } from "../constants/IconLogo";
+import { AuthContext } from "../../provider/UserProvider";
+import useAxiosPublic from "../hooks/useAxiosPublic";
+import useMoneyMap from "../hooks/useMoneyMap";
 
 const HomeScreen = ({ navigation }) => {
-    const [balance, setBalance] = useState("Balance");
+    const [isClicked, setIsClicked] = useState(false);
+    const [Balance, setBalance] = useState("");
+
+    const { user } = useContext(AuthContext);
+    // console.log("User details from home ->", user);
+
+    const handleBalance = async () => {
+
+        const axiosPublic = useAxiosPublic();
+        const res = await axiosPublic.get(`/checkBalance?userEmail=${user.email}`);
+        console.log(res.data);
+        setBalance(res.data.balance);
+
+        setIsClicked(!isClicked);
+    }
+
+
+    
+
+
 
     return (
         <SafeAreaView style={styles.container}>
@@ -21,9 +43,14 @@ const HomeScreen = ({ navigation }) => {
                 <View style={styles.homeheader}>
                     <TouchableOpacity
                         style={styles.balancebtn}
-                        // handle this onPress using backend logic to fetch balance from server
+                        onPress={() => handleBalance()}
                     >
-                        <Text style={styles.btntxt}>{balance}</Text>
+                        {
+                            isClicked ?
+                                <Text style={styles.btntxt}>{Balance}</Text>
+                                :
+                                <Text style={styles.btntxt}>Balance</Text>
+                        }
                     </TouchableOpacity>
                     <Image
                         style={styles.bodycomponent}
@@ -33,7 +60,9 @@ const HomeScreen = ({ navigation }) => {
                 <View style={styles.homebody}>
                     <View></View>
                     <View style={styles.componentpair}>
-                        <TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate("CashOut")}
+                        >
                             <Image
                                 style={styles.bodycomponent}
                                 source={IconLogo.cashout}
@@ -45,8 +74,9 @@ const HomeScreen = ({ navigation }) => {
                                 source={IconLogo.qrcode}
                             />
                         </TouchableOpacity>
+
+                        {/* Send Money */}
                         <TouchableOpacity
-                            // handle this onPress using backend logic
                             onPress={() => navigation.navigate("Send")}
                         >
                             <Image
@@ -82,7 +112,9 @@ const HomeScreen = ({ navigation }) => {
                                 source={IconLogo.paybill}
                             />
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        <TouchableOpacity
+                        onPress={() => navigation.navigate("Save")}
+                        >
                             <Image
                                 style={styles.bodycomponent}
                                 source={IconLogo.savings}
@@ -96,18 +128,32 @@ const HomeScreen = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
                     <View style={styles.componentpair}>
-                        <TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate("Request")}
+                        >
                             <Image
                                 style={styles.bodycomponent}
                                 source={IconLogo.requestmoney}
                             />
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate("Map")}
+                        >
                             <Image
                                 style={styles.bodycomponent}
                                 source={IconLogo.moneymap}
                             />
                         </TouchableOpacity>
+                        {/* <TouchableOpacity
+                            onPress={() => navigation.navigate("Mapping",
+                                { obj }
+                            )}
+                        >
+                            <Image
+                                style={styles.bodycomponent}
+                                source={IconLogo.moneymap}
+                            />
+                        </TouchableOpacity> */}
                         <TouchableOpacity>
                             <Image
                                 style={styles.bodycomponent}
