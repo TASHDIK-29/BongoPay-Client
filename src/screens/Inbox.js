@@ -1,15 +1,15 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useContext } from "react";
-import { 
-  SafeAreaView, 
-  View, 
-  Text, 
-  Image, 
-  FlatList, 
-  ActivityIndicator,
-  RefreshControl,
-  TouchableOpacity,
-  StyleSheet
+import {
+    SafeAreaView,
+    View,
+    Text,
+    Image,
+    FlatList,
+    ActivityIndicator,
+    RefreshControl,
+    TouchableOpacity,
+    StyleSheet
 } from "react-native";
 
 import { IconLogo } from "../constants/IconLogo";
@@ -27,79 +27,79 @@ const InboxScreen = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-    <StatusBar style="light" backgroundColor="#0F0F0F" />
-    
-    {/* Header */}
-    <View style={styles.header}>
-        <Text style={styles.headerText}>Transaction History</Text>
-        <Image 
-            source={IconLogo.logo} 
-            style={styles.logo} 
-            resizeMode="contain"
-        />
-    </View>
+            <StatusBar style="light" backgroundColor="#0F0F0F" />
 
-    {/* Transaction List */}
-    <View style={styles.content}>
-        {isLoading ? (
-            <ActivityIndicator 
-                size="large" 
-                color="#7C4DFF" 
-                style={{ marginTop: 40 }}
-            />
-        ) : error ? (
-            <View style={styles.errorContainer}>
-                <MaterialIcons
-                    name="error-outline" 
-                    size={40} 
-                    color="#FF6E6E" 
+            {/* Header */}
+            <View style={styles.header}>
+                <Text style={styles.headerText}>Transaction History</Text>
+                <Image
+                    source={IconLogo.logo}
+                    style={styles.logo}
+                    resizeMode="contain"
                 />
-                <Text style={styles.errorText}>
-                    Failed to load transactions
-                </Text>
-                <TouchableOpacity 
-                    onPress={refetch} 
-                    style={styles.retryButton}
-                >
-                    <Text style={styles.retryButtonText}>Try Again</Text>
-                </TouchableOpacity>
             </View>
-        ) : data && data.length > 0 ? (
-            <FlatList
-                data={data}
-                renderItem={({ item }) => (
-                    <TransactionCard 
-                        transaction={item} 
+
+            {/* Transaction List */}
+            <View style={styles.content}>
+                {isLoading ? (
+                    <ActivityIndicator
+                        size="large"
+                        color="#7C4DFF"
+                        style={{ marginTop: 40 }}
                     />
+                ) : error ? (
+                    <View style={styles.errorContainer}>
+                        <MaterialIcons
+                            name="error-outline"
+                            size={40}
+                            color="#FF6E6E"
+                        />
+                        <Text style={styles.errorText}>
+                            Failed to load transactions
+                        </Text>
+                        <TouchableOpacity
+                            onPress={refetch}
+                            style={styles.retryButton}
+                        >
+                            <Text style={styles.retryButtonText}>Try Again</Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : data && data.length > 0 ? (
+                    <FlatList
+                        data={data}
+                        renderItem={({ item }) => (
+                            <TransactionCard
+                                transaction={item}
+                            />
+                        )}
+                        keyExtractor={(item) => item._id}
+                        ItemSeparatorComponent={() => <View style={styles.separator} />}
+                        contentContainerStyle={styles.listContent}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={isLoading}
+                                onRefresh={refetch}
+                                colors={['#7C4DFF']}
+                                progressBackgroundColor="#1A1A1A"
+                            />
+                        }
+                        showsVerticalScrollIndicator={false}
+                    />
+                ) : (
+                    <View style={styles.emptyContainer}>
+                        <MaterialIcons
+                            name="inbox"
+                            size={48}
+                            color="#A0A0A0"
+                        />
+                        <Text style={styles.emptyText}>No transactions yet</Text>
+                        <Text style={styles.emptySubText}>
+                            Your transactions will appear here
+                        </Text>
+                    </View>
                 )}
-                keyExtractor={(item) => item._id}
-                ItemSeparatorComponent={() => <View style={styles.separator} />}
-                contentContainerStyle={styles.listContent}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={isLoading}
-                        onRefresh={refetch}
-                        colors={['#7C4DFF']}
-                        progressBackgroundColor="#1A1A1A"
-                    />
-                }
-                showsVerticalScrollIndicator={false}
-            />
-        ) : (
-            <View style={styles.emptyContainer}>
-                <MaterialIcons 
-                    name="inbox" 
-                    size={48} 
-                    color="#A0A0A0" 
-                />
-                <Text style={styles.emptyText}>No transactions yet</Text>
-                <Text style={styles.emptySubText}>
-                    Your transactions will appear here
-                </Text>
             </View>
-        )}
-    </View>
-</SafeAreaView>
+        </SafeAreaView>
     );
 };
 

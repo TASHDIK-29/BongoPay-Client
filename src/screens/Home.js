@@ -13,6 +13,7 @@ import { IconLogo } from "../constants/IconLogo";
 import { AuthContext } from "../../provider/UserProvider";
 import useAxiosPublic from "../hooks/useAxiosPublic";
 import useMoneyMap from "../hooks/useMoneyMap";
+import QRCodePopup from '../components/QRCodePopup.jsx';
 
 const HomeScreen = ({ navigation }) => {
     const [isClicked, setIsClicked] = useState(false);
@@ -32,7 +33,8 @@ const HomeScreen = ({ navigation }) => {
     }
 
 
-    
+    // QR
+    const [showQR, setShowQR] = useState(false);
 
 
 
@@ -68,12 +70,23 @@ const HomeScreen = ({ navigation }) => {
                                 source={IconLogo.cashout}
                             />
                         </TouchableOpacity>
-                        <TouchableOpacity>
+
+                        {/* Qr Code */}
+                        <TouchableOpacity
+                        onPress={() => setShowQR(true)}
+                        >
                             <Image
                                 style={styles.bodycomponent}
                                 source={IconLogo.qrcode}
                             />
                         </TouchableOpacity>
+
+                        {/* QR Code Popup */}
+                        <QRCodePopup
+                            isVisible={showQR}
+                            onClose={() => setShowQR(false)}
+                            email={user.email}
+                        />
 
                         {/* Send Money */}
                         <TouchableOpacity
@@ -113,7 +126,7 @@ const HomeScreen = ({ navigation }) => {
                             />
                         </TouchableOpacity>
                         <TouchableOpacity
-                        onPress={() => navigation.navigate("Save")}
+                            onPress={() => navigation.navigate("Save")}
                         >
                             <Image
                                 style={styles.bodycomponent}

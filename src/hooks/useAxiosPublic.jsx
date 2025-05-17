@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosPublic = axios.create({
-    baseURL: 'http://192.168.0.107:8080'
+    baseURL: 'http://192.168.0.108:8080'
 })
 
 const useAxiosPublic = () => {

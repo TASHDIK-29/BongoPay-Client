@@ -1,31 +1,52 @@
-import React, { useState, useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TextInput, 
-  TouchableOpacity, 
-  KeyboardAvoidingView, 
-  Platform, 
-  ScrollView, 
+import React, { useState, useRef, useContext } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Modal,
   Animated,
   Easing,
   Keyboard,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
+  ActivityIndicator,
+  FlatList,
+  RefreshControl
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { AuthContext } from '../../provider/UserProvider';
+import useAxiosPublic from '../hooks/useAxiosPublic';
+import useFetchCurrentSavingsInfo from '../hooks/useFetchCurrentSavingsInfo';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const SavingsScreen = () => {
-  const [savingsData, setSavingsData] = useState({
-    currentSavings: 1250.75,
-    goalAmount: 5000,
-    transactions: [
-      { id: 1, amount: 200, date: '2023-05-15', type: 'deposit' },
-      { id: 2, amount: 50, date: '2023-05-10', type: 'deposit' },
-      { id: 3, amount: 1000, date: '2023-05-01', type: 'deposit' },
-    ],
+
+  const axiosPublic = useAxiosPublic();
+
+  const { user } = useContext(AuthContext);
+  const userEmail = user.email;
+  // console.log(userEmail);
+
+  const { savingsData, setSavingsData, isLoading, error, refetch } = useFetchCurrentSavingsInfo({
+    email: user.email
   });
+
+  console.log("Data from Saving screen -> ", savingsData);
+
+
+  // const [savingsData, setSavingsData] = useState({
+  //   currentSavings: 1250.75,
+  //   goalAmount: 5000,
+  //   transactions: [
+  //     { id: 1, amount: 200, date: '2023-05-15', type: 'deposit' },
+  //     { id: 2, amount: 50, date: '2023-05-10', type: 'deposit' },
+  //     { id: 3, amount: 1000, date: '2023-05-01', type: 'deposit' },
+  //   ],
+  // });
 
   const [amount, setAmount] = useState('');
   const [email, setEmail] = useState('');
@@ -39,7 +60,7 @@ const SavingsScreen = () => {
   const depositAnim = useRef(new Animated.Value(0)).current;
   const withdrawAnim = useRef(new Animated.Value(0)).current;
 
-  const progressPercentage = Math.min((savingsData.currentSavings / savingsData.goalAmount) * 100, 100);
+  const progressPercentage = parseInt(Math.min((savingsData.currentSavings / savingsData.goalAmount) * 100, 100));
   const goalAchieved = progressPercentage >= 100;
 
   // Keyboard listeners
@@ -63,24 +84,19 @@ const SavingsScreen = () => {
     };
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!amount || !email) {
-      alert('Please enter both amount and email');
-      return;
+      return alert('Please enter both amount and email');
     }
 
-    const newTransaction = {
-      id: savingsData.transactions.length + 1,
-      amount: parseFloat(amount),
-      date: new Date().toISOString().split('T')[0],
-      type: 'deposit',
-    };
 
-    setSavingsData({
-      ...savingsData,
-      currentSavings: savingsData.currentSavings + parseFloat(amount),
-      transactions: [newTransaction, ...savingsData.transactions],
-    });
+    if (userEmail != email) {
+      return alert("Invalid Email.");
+    }
+
+    const res = await axiosPublic.patch('/savings', { userEmail, amount });
+    // console.log(res.data);
+    refetch();
 
     setAmount('');
     setEmail('');
@@ -88,7 +104,7 @@ const SavingsScreen = () => {
     alert(`Successfully saved $${amount}`);
   };
 
-  const handleWithdraw = () => {
+  const handleWithdraw = async () => {
     if (!withdrawAmount || isNaN(withdrawAmount)) {
       alert('Please enter a valid amount');
       return;
@@ -104,18 +120,23 @@ const SavingsScreen = () => {
       return;
     }
 
-    const newTransaction = {
-      id: savingsData.transactions.length + 1,
-      amount: withdrawValue,
-      date: new Date().toISOString().split('T')[0],
-      type: 'withdrawal',
-    };
 
-    setSavingsData({
-      ...savingsData,
-      currentSavings: savingsData.currentSavings - withdrawValue,
-      transactions: [newTransaction, ...savingsData.transactions],
-    });
+    const res = await axiosPublic.patch('/withdrawal', { userEmail, amount: withdrawAmount });
+    // console.log(res.data);
+    refetch();
+
+    // const newTransaction = {
+    //   id: savingsData.transactions.length + 1,
+    //   amount: withdrawValue,
+    //   date: new Date().toISOString().split('T')[0],
+    //   type: 'withdrawal',
+    // };
+
+    // setSavingsData({
+    //   ...savingsData,
+    //   currentSavings: savingsData.currentSavings - withdrawValue,
+    //   transactions: [newTransaction, ...savingsData.transactions],
+    // });
 
     setWithdrawAmount('');
     closeWithdrawInput();
@@ -182,7 +203,7 @@ const SavingsScreen = () => {
     }).start(() => setShowWithdrawInput(false));
   };
 
-  const handleSetGoal = () => {
+  const handleSetGoal = async () => {
     if (!newGoal || isNaN(newGoal)) {
       alert('Please enter a valid amount');
       return;
@@ -194,12 +215,11 @@ const SavingsScreen = () => {
       return;
     }
 
-    setSavingsData({
-      ...savingsData,
-      goalAmount: goalValue,
-    });
 
-    setNewGoal('');
+    const res = await axiosPublic.patch('/setGoalAmount', { userEmail, amount: newGoal });
+    // console.log(res.data);
+    refetch();
+    setNewGoal("");
     closeGoalModal();
   };
 
@@ -241,7 +261,7 @@ const SavingsScreen = () => {
           style={styles.container}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
         >
-          <ScrollView 
+          <SafeAreaView
             contentContainerStyle={styles.scrollContainer}
             keyboardShouldPersistTaps="handled"
           >
@@ -249,70 +269,122 @@ const SavingsScreen = () => {
             <View style={styles.savingsCard}>
               <View style={styles.cardHeader}>
                 <Text style={styles.cardTitle}>Your Savings</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={openGoalModal}
                   style={styles.editGoalButton}
                 >
                   <MaterialIcons name="edit" size={20} color="#BB86FC" />
                 </TouchableOpacity>
               </View>
-              
+
               <View style={styles.amountContainer}>
-                <Text style={styles.currentAmount}>${savingsData.currentSavings.toFixed(2)}</Text>
-                <Text style={styles.goalText}>of ${savingsData.goalAmount.toFixed(2)} goal</Text>
+                <Text style={styles.currentAmount}>${savingsData.currentSavings}</Text>
+                <Text style={styles.goalText}>of ${savingsData.goalAmount} goal</Text>
               </View>
 
               {/* Progress Bar */}
               <View style={styles.progressBar}>
-                <View 
+                <View
                   style={[
-                    styles.progressFill, 
+                    styles.progressFill,
                     { width: `${progressPercentage}%` }
                   ]}
                 />
               </View>
-              <Text style={styles.progressText}>{progressPercentage.toFixed(2)}% completed</Text>
+              <Text style={styles.progressText}>{progressPercentage}% completed</Text>
             </View>
 
             {/* Recent Transactions */}
             <View style={styles.transactionsCard}>
               <Text style={styles.cardTitle}>Recent Transactions</Text>
-              {savingsData.transactions.map((transaction) => (
-                <View key={transaction.id} style={styles.transactionItem}>
-                  <MaterialIcons 
-                    name={transaction.type === 'deposit' ? "arrow-circle-up" : "arrow-circle-down"} 
-                    size={24} 
-                    color={transaction.type === 'deposit' ? "#4CAF50" : "#FF5252"} 
-                    style={styles.transactionIcon}
+              {isLoading ? (
+                <ActivityIndicator
+                  size="large"
+                  color="#BB86FC"
+                  style={{ marginTop: 40 }}
+                />
+              ) : error ? (
+                <View style={styles.errorContainer}>
+                  <MaterialIcons
+                    name="error-outline"
+                    size={40}
+                    color="#FF5252"
                   />
-                  <View style={styles.transactionDetails}>
-                    <Text style={styles.transactionDate}>{transaction.date}</Text>
-                    <Text style={styles.transactionType}>
-                      {transaction.type === 'deposit' ? 'Deposit' : 'Withdrawal'}
-                    </Text>
-                  </View>
-                  <Text style={[
-                    styles.transactionAmount,
-                    { color: transaction.type === 'deposit' ? '#4CAF50' : '#FF5252' }
-                  ]}>
-                    {transaction.type === 'deposit' ? '+' : '-'}${transaction.amount.toFixed(2)}
+                  <Text style={styles.errorText}>
+                    Failed to load transactions
+                  </Text>
+                  <TouchableOpacity
+                    onPress={refetch}
+                    style={styles.retryButton}
+                  >
+                    <Text style={styles.retryButtonText}>Try Again</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : savingsData?.transactions && savingsData.transactions.length > 0 ? (
+                <FlatList
+                  data={savingsData.transactions}
+                  renderItem={({ item }) => (
+                    <View key={item.id} style={styles.transactionItem}>
+                      <MaterialIcons
+                        name={item.type === 'Deposit' ? "arrow-circle-up" : "arrow-circle-down"}
+                        size={24}
+                        color={item.type === 'Deposit' ? "#4CAF50" : "#FF5252"}
+                        style={styles.transactionIcon}
+                      />
+                      <View style={styles.transactionDetails}>
+                        <Text style={styles.transactionDate}>{item.date}</Text>
+                        <Text style={styles.transactionType}>
+                          {item.type === 'Deposit' ? 'Deposit' : 'Withdrawal'}
+                        </Text>
+                      </View>
+                      <Text style={[
+                        styles.transactionAmount,
+                        { color: item.type === 'Deposit' ? '#4CAF50' : '#FF5252' }
+                      ]}>
+                        {item.type === 'Deposit' ? '+' : '-'}${item.amount}
+                      </Text>
+                    </View>
+                  )}
+                  keyExtractor={(item) => item.id.toString()}
+                  ItemSeparatorComponent={() => <View style={styles.separator} />}
+                  contentContainerStyle={styles.listContent}
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={isLoading}
+                      onRefresh={refetch}
+                      colors={['#BB86FC']}
+                      progressBackgroundColor="#1A1A1A"
+                    />
+                  }
+                  showsVerticalScrollIndicator={false}
+                />
+              ) : (
+                <View style={styles.emptyContainer}>
+                  <MaterialIcons
+                    name="inbox"
+                    size={48}
+                    color="#A0A0A0"
+                  />
+                  <Text style={styles.emptyText}>No transactions yet</Text>
+                  <Text style={styles.emptySubText}>
+                    Your transactions will appear here
                   </Text>
                 </View>
-              ))}
+              )}
             </View>
-          </ScrollView>
+          </SafeAreaView>
 
           {/* Action Buttons */}
           <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.depositButton}
               onPress={openDepositInput}
             >
               <Text style={styles.depositButtonText}>Add to Savings</Text>
             </TouchableOpacity>
-            
+
             {goalAchieved && (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.withdrawButton}
                 onPress={openWithdrawInput}
               >
@@ -327,13 +399,13 @@ const SavingsScreen = () => {
           <Animated.View style={[styles.overlay, { opacity: depositOpacity }]}>
             <Animated.View style={[
               styles.inputContainer,
-              { 
+              {
                 transform: [{ translateY: depositTranslateY }],
                 marginBottom: keyboardHeight > 0 ? keyboardHeight : 0
               }
             ]}>
               <Text style={styles.inputTitle}>Add to Savings</Text>
-              
+
               <TextInput
                 style={styles.input}
                 placeholder="Enter amount"
@@ -342,7 +414,7 @@ const SavingsScreen = () => {
                 onChangeText={setAmount}
                 placeholderTextColor="#999"
               />
-              
+
               <TextInput
                 style={styles.input}
                 placeholder="Confirm your email"
@@ -351,16 +423,16 @@ const SavingsScreen = () => {
                 onChangeText={setEmail}
                 placeholderTextColor="#999"
               />
-              
+
               <View style={styles.buttonRow}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.actionButton, styles.cancelButton]}
                   onPress={closeDepositInput}
                 >
                   <Text style={styles.actionButtonText}>Cancel</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                   style={[styles.actionButton, styles.saveButton]}
                   onPress={handleSave}
                 >
@@ -376,13 +448,13 @@ const SavingsScreen = () => {
           <Animated.View style={[styles.overlay, { opacity: withdrawOpacity }]}>
             <Animated.View style={[
               styles.inputContainer,
-              { 
+              {
                 transform: [{ translateY: withdrawTranslateY }],
                 marginBottom: keyboardHeight > 0 ? keyboardHeight : 0
               }
             ]}>
               <Text style={styles.inputTitle}>Withdraw from Savings</Text>
-              
+
               <TextInput
                 style={styles.input}
                 placeholder="Enter amount"
@@ -391,20 +463,20 @@ const SavingsScreen = () => {
                 onChangeText={setWithdrawAmount}
                 placeholderTextColor="#999"
               />
-              
+
               <Text style={styles.availableText}>
-                Available: ${savingsData.currentSavings.toFixed(2)}
+                Available: ${savingsData.currentSavings}
               </Text>
-              
+
               <View style={styles.buttonRow}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.actionButton, styles.cancelButton]}
                   onPress={closeWithdrawInput}
                 >
                   <Text style={styles.actionButtonText}>Cancel</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                   style={[styles.actionButton, styles.withdrawConfirmButton]}
                   onPress={handleWithdraw}
                 >
@@ -425,13 +497,13 @@ const SavingsScreen = () => {
           <Animated.View style={[styles.overlay, { opacity: modalOpacity }]}>
             <Animated.View style={[
               styles.modalContent,
-              { 
+              {
                 transform: [{ translateY: modalTranslateY }],
                 marginBottom: keyboardHeight > 0 ? keyboardHeight : 0
               }
             ]}>
               <Text style={styles.modalTitle}>Set Savings Goal</Text>
-              
+
               <TextInput
                 style={styles.modalInput}
                 placeholder="Enter goal amount"
@@ -441,16 +513,16 @@ const SavingsScreen = () => {
                 placeholderTextColor="#999"
                 autoFocus={true}
               />
-              
+
               <View style={styles.modalButtonContainer}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.modalButton, styles.cancelButton]}
                   onPress={closeGoalModal}
                 >
                   <Text style={styles.modalButtonText}>Cancel</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                   style={[styles.modalButton, styles.confirmButton]}
                   onPress={handleSetGoal}
                 >
@@ -697,6 +769,63 @@ const styles = StyleSheet.create({
   },
   confirmButtonText: {
     color: '#000',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 30,
+    backgroundColor: '#141414',
+    margin: 20,
+    borderRadius: 12,
+  },
+  errorText: {
+    color: '#FF6E6E',
+    fontSize: 15,
+    fontWeight: '600',
+    marginTop: 20,
+    marginBottom: 25,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  retryButton: {
+    backgroundColor: '#7C4DFF', // Vibrant purple accent
+    borderRadius: 10,
+    paddingHorizontal: 28,
+    paddingVertical: 14,
+    shadowColor: '#7C4DFF',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 30,
+    marginHorizontal: 20,
+    backgroundColor: '#141414',
+    borderRadius: 12,
+  },
+  emptyText: {
+    color: '#E0E0E0',
+    fontSize: 17,
+    fontWeight: '700',
+    marginTop: 18,
+    letterSpacing: 0.3,
+  },
+  emptySubText: {
+    color: '#A0A0A0',
+    fontSize: 14,
+    marginTop: 6,
+    fontWeight: '500',
   },
 });
 
